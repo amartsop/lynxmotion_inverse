@@ -52,7 +52,6 @@ void LynxMotion::inverseKinematics(BLA::Matrix<3, 1> dFeF0, BLA::Matrix<3, 3> RF
     float theta4 = atan2(RFeF3(1, 2), RFeF3(0, 2));
     float theta5 = atan2(RFeF3(2, 0), RFeF3(2, 1));
 
-
     // Write values to robot
     int jointVec[servoNum] = { 
         (int)SignalProcessing<float>::rad2Deg(theta1),

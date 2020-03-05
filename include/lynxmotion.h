@@ -49,11 +49,11 @@ class LynxMotion
     private:
 
             // Dimensions
-        const float m_L1 = 0.075;
-        const float m_L2 = 0.1463;
-        const float m_L3 = 0.1782;
-        const float m_L4 = 0.0286;
-        const float m_Le = 0.0398;
+        const float m_L1 = 0.07;
+        const float m_L2 = 0.1200;
+        const float m_L3 = 0.1300;
+        const float m_L4 = 0.0600;
+        const float m_Le = 0.02500;
         const float m_t3S = -1.0;
         const float m_t2Phi1S = 1.0;
 

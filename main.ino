@@ -1,56 +1,8 @@
 
-
-// #include "Arduino.h"
-// #include "./include/lynxmotion.h"
-
-// // #define servoNum 6
-
-// // Robot instance
-// LynxMotion robot;
-
-// // Joint space vector
-// int jointVec[servoNum] = {0};
-
-
-// void setup()
-// {
-//     robot.init();
-//     Serial.begin(9600);
-// }
-
-
-
-// void loop()
-// {
-//     /******************** Forward Kinematics ******************/
-
-
-//     //Joystick
-//     jointVec[robot.jointIndices.joint1] = 0;
-//     jointVec[robot.jointIndices.joint2] = 80;
-//     jointVec[robot.jointIndices.joint3] = 0;
-//     jointVec[robot.jointIndices.joint4] = 0;
-//     jointVec[robot.jointIndices.joint5] = 8000;
-
-
-//     // Forward Kinematics
-//     robot.forwardKinematics(jointVec);
-
-
-
-
-//     delay(50);
-
-
-//     // Serial.println(angle);
-
-    
-
-// }
-
 #include "Arduino.h"
 #include "./include/lynxmotion.h"
 #include "BasicLinearAlgebra.h"
+#include "./include/signal_processing.hpp"
 
 
 // Robot instance
@@ -59,6 +11,17 @@ LynxMotion robot;
 // Joint space vector
 int jointVec[servoNum] = {0};
 
+// Limits
+const float upperCartesianLimits[3] = {0.16, 0.1, 0.15};
+const float lowerCartesianLimits[3] = {0.07, -0.1, 0.0};
+
+// Initial cartesian values
+float xe = 0.1;
+float ye = 0.1;
+float ze = 0.0;
+
+
+float count =-0.2;
 
 void setup()
 {
@@ -66,31 +29,24 @@ void setup()
     Serial.begin(9600);
 }
 
-int count = 0;
 
 void loop()
 {
-    /******************** Inverse Kinematics ******************/
-    // Joystick
-    
-    if (count > 7)
-    {
-        count = 0;
-        delay(3000);
-    }
 
-    // Desired position
-    BLA::Matrix<3, 8> trajectory = 
-    {
-        0.05, 0.13, 0.13, 0.05, 0.13, 0.13, 0.13, 0.05,
-        -0.1, -0.1, 0.15, 0.15, -0.1, -0.1, 0.15, 0.15,
-        0.1, 0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2
-    };
+    ze = count;
     
+    
+    xe = SignalProcessing<float>::clipping(xe, lowerCartesianLimits[0],
+        upperCartesianLimits[0]);
 
-    BLA::Matrix<3, 1> dFeF0 = {trajectory(0, count), 
-        trajectory(1, count), trajectory(2, count)};
+    ye = SignalProcessing<float>::clipping(ye, lowerCartesianLimits[1],
+        upperCartesianLimits[1]);
+
+    ze = SignalProcessing<float>::clipping(ze, lowerCartesianLimits[2],
+    upperCartesianLimits[2]); 
     
+    BLA::Matrix<3, 1> dFeF0 {xe, ye, ze} ;
+
     // Desired orientation
     BLA::Matrix<3, 3> RFeF0{1.0, 0.0, 0.0,
                             0.0, 1.0, 0.0,
@@ -98,8 +54,8 @@ void loop()
 
     robot.inverseKinematics(dFeF0, RFeF0);
     
-    count += 1;
+    count = count + 0.001;
 
-    delay(1000);
+    delay(40);
 }
 
